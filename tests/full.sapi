@@ -1,0 +1,27 @@
+callable http.get /healthz {
+  query string name {
+    description = "Name of the service to check health for"
+    default = "default-service"
+  }
+
+  response 'OK' {
+	status = 200
+	body = {
+	  message = "Service {name} is healthy"
+	}
+  }
+
+  response "Service Not Found" {
+  	status = 404
+  	body = {
+  	  message = "Service {name} not found"
+  	}
+  }
+
+  response "Internal Server Error" {
+	status: 500
+	body = {
+	  message: "An unexpected error occurred"
+	}
+  }
+}

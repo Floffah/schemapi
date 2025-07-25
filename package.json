@@ -1,0 +1,11 @@
+{
+  "scripts": {
+    "docs:dev": "bunx --bun vitepress dev docs",
+    "docs:build": "bunx --bun vitepress build docs",
+    "docs:preview": "bunx --bun vitepress preview docs"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.2.19",
+    "vitepress": "^1.6.3"
+  }
+}

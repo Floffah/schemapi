@@ -1,0 +1,15 @@
+[TestParserSnapshot/callable.sapi - 1]
+&parser.RootNode{
+    Children: {
+        &parser.CallableNode{
+            Type:       "http.get",
+            Identifier: &parser.PathNode{
+                parts: {"healthz"},
+            },
+            Params:   {},
+            Children: {
+            },
+        },
+    },
+}
+---
