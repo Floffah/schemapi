@@ -5,7 +5,6 @@ go 1.24.5
 require (
 	github.com/charmbracelet/lipgloss v1.1.0
 	github.com/gkampitakis/go-snaps v0.5.13
-	github.com/lucasb-eyer/go-colorful v1.2.0
 )
 
 require (

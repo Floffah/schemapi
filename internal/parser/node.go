@@ -6,18 +6,10 @@ const (
 	NodeRoot NodeType = iota
 	NodeCallable
 	NodeIdentifier
-
-	NodeNil
 )
 
 type Node interface {
 	NodeType() NodeType
-}
-
-type NilNode struct{}
-
-func (n *NilNode) NodeType() NodeType {
-	return NodeNil
 }
 
 type RootNode struct {
