@@ -21,8 +21,15 @@ jobs:
       with:
         go-version-file: 'go.mod'
 
+    - name: Lint
+      run: go vet ./...
+
     - name: Build
       run: go build -v ./...
 
     - name: Test
       run: go test -v ./...
+
+    - name: Run
+      working-directory: tests
+      run: ./main

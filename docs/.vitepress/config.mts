@@ -6,6 +6,10 @@ export default defineConfig({
   description: "Documentation for Schemapi",
   base: "/schemapi",
   themeConfig: {
+    editLink: {
+      pattern: 'https://github.com/floffah/schemapi/edit/main/docs/:path'
+    },
+
     // https://vitepress.dev/reference/default-theme-config
     nav: [
       { text: 'Home', link: '/' },

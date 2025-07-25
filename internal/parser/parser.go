@@ -29,13 +29,6 @@ func (p *Parser) expect(typ lexer.TokenType) bool {
 	return p.curTok.Type == typ
 }
 
-func (p *Parser) formatPosition() string {
-	if p.curTok.Type == lexer.TokenEOF {
-		return "EOF"
-	}
-	return "unknown"
-}
-
 func (p *Parser) getError(message string) error {
 	return &ParserError{
 		Message: message,
