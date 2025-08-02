@@ -25,11 +25,11 @@ jobs:
       run: go vet ./...
 
     - name: Build
-      run: go build -v ./...
+      run: go build -v -o build/schemapi ./main.go
 
     - name: Test
       run: go test -v ./...
 
     - name: Run
       working-directory: tests
-      run: ./main
+      run: ./build/schemapi
