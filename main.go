@@ -1,7 +1,9 @@
 package main
 
 import (
+	"fmt"
 	"github.com/floffah/schemapi/internal/logger"
+	"github.com/floffah/schemapi/internal/parser"
 	"os"
 	"strings"
 )
@@ -31,6 +33,21 @@ func prog() int {
 		logger.PrintError("No Schemapi files found in the current directory", nil)
 
 		return 1
+	}
+
+	for _, file := range files {
+		if !strings.HasSuffix(file.Name(), ".sapi") {
+			continue
+		}
+
+		data, err := os.ReadFile(file.Name())
+		logger.HandleError(err)
+
+		fileParser := parser.NewParser(string(data))
+		rootNode, err := fileParser.Parse()
+		logger.HandleParseError(err, file.Name())
+
+		fmt.Println(rootNode)
 	}
 
 	return 0

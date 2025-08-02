@@ -5,13 +5,12 @@ import (
 	"strings"
 )
 
-// Parse parses the tokens into an AST
 func (p *Parser) Parse() (*RootNode, error) {
 	root := &RootNode{
 		Children: []Node{},
 	}
 
-	for p.curTok.Type != lexer.TokenEOF {
+	for !p.expect(lexer.TokenEOF) {
 		node, err := p.parseBlock()
 		if err != nil {
 			return nil, err
@@ -19,19 +18,21 @@ func (p *Parser) Parse() (*RootNode, error) {
 		if node != nil {
 			root.Children = append(root.Children, node)
 		} else {
-			if p.curTok.Type == lexer.TokenEOF {
+			if p.expect(lexer.TokenEOF) {
 				break
 			}
-			return nil, p.getErrorf("unexpected token: %s", p.curTok.Literal)
+			return nil, p.getErrorf("unexpected token: %s", p.curTok.Value)
 		}
 	}
 
 	return root, nil
 }
 
+// --- Blocks ---
+
 func (p *Parser) parseBlock() (Node, error) {
-	if p.curTok.Type == lexer.TokenKeyword {
-		if p.curTok.Literal == "callable" {
+	if p.expect(lexer.TokenKeyword) {
+		if p.curTok.Value == "callable" {
 			return p.parseCallable()
 		}
 	}
@@ -39,18 +40,14 @@ func (p *Parser) parseBlock() (Node, error) {
 }
 
 func (p *Parser) parseCallable() (Node, error) {
-	if !p.expect(lexer.TokenKeyword) || p.curTok.Literal != "callable" {
-		return nil, p.getErrorf("expected 'callable' but got %s", p.curTok.Literal)
+	if !p.expect(lexer.TokenKeyword) || p.curTok.Value != "callable" {
+		return nil, p.getErrorf("expected 'callable' but got %s", p.curTok.Value)
 	}
 	p.next() // advance after confirming 'callable' keyword
 
-	callableType := ""
-
-	if p.expect(lexer.TokenIdent) {
-		callableType = p.curTok.Literal
-		p.next()
-	} else {
-		return nil, p.getError("expected callable type")
+	callableType, err := p.parseIdentifier()
+	if err != nil {
+		return nil, err
 	}
 
 	var identifier Node = &IdentifierNode{
@@ -70,43 +67,190 @@ func (p *Parser) parseCallable() (Node, error) {
 		}
 		identifier = i
 	} else {
-		return nil, p.getErrorf("expected identifier or path, got %s", p.curTok.Literal)
+		return nil, p.getErrorf("expected identifier or path, got %s", p.curTok.Value)
 	}
 
 	node := &CallableNode{
 		Type:       callableType,
 		Identifier: identifier,
-		Params:     []string{},
+		Params:     []Node{},
 		Children:   []Node{},
 	}
 
 	for !p.expect(lexer.TokenLBrace) {
-		if p.curTok.Type == lexer.TokenEOF {
+		if p.expect(lexer.TokenEOF) {
 			return nil, p.getError("unexpected EOF before '{'")
 		}
-		node.Params = append(node.Params, p.curTok.Literal)
+
+		param, err := p.parseValue()
+		if err != nil {
+			return nil, err
+		}
+
+		node.Params = append(node.Params, param)
 		p.next()
 	}
 	p.next() // advance past '{'
 
 	for !p.expect(lexer.TokenRBrace) {
-		if p.curTok.Type == lexer.TokenEOF {
+		if p.expect(lexer.TokenEOF) {
 			return nil, p.getError("unexpected EOF before '}'")
 		}
-		p.next()
+
+		childNode, err := p.parseCallableDefinition()
+		if err != nil {
+			return nil, err
+		}
+
+		if childNode != nil {
+			node.Children = append(node.Children, childNode)
+		} else {
+			return nil, p.getErrorf("unexpected token: %s", p.curTok.Value)
+		}
 	}
 	p.next() // advance past '}'
 
 	return node, nil
 }
 
+func (p *Parser) parseCallableDefinition() (Node, error) {
+	defType, err := p.parseIdentifier()
+	if err != nil {
+		return nil, err
+	}
+
+	node := &CallableDefinitionNode{
+		Type:     defType,
+		Params:   []Node{},
+		Children: nil,
+	}
+
+	for !p.expect(lexer.TokenLBrace) {
+		if p.expect(lexer.TokenEOF) {
+			return nil, p.getError("unexpected EOF before '{'")
+		}
+
+		param, err := p.parseValue()
+		if err != nil {
+			return nil, err
+		}
+
+		node.Params = append(node.Params, param)
+	}
+
+	dictionary, err := p.parseDictionary()
+	if err != nil {
+		return nil, err
+	}
+
+	node.Children = dictionary
+
+	return node, nil
+}
+
+func (p *Parser) parseDictionary() (Node, error) {
+	node := &DictionaryNode{
+		Entries: []EntryNode{},
+	}
+
+	if !p.expect(lexer.TokenLBrace) {
+		return nil, p.getErrorf("expected '{' but got %s", p.curTok.Value)
+	}
+	p.next() // advance past '{'
+
+	for !p.expect(lexer.TokenRBrace) {
+		if p.expect(lexer.TokenEOF) {
+			return nil, p.getError("unexpected EOF before '}'")
+		}
+
+		entry := EntryNode{}
+
+		identifier, err := p.parseIdentifier()
+		if err != nil {
+			return nil, err
+		}
+
+		entry.Identifier = identifier
+
+		if !p.expect(lexer.TokenEqual) {
+			return nil, p.getErrorf("expected '=' but got %s", p.curTok.Value)
+		}
+
+		p.next() // advance past '='
+
+		value, err := p.parseValueOrComplexType()
+		if err != nil {
+			return nil, err
+		}
+		entry.Value = value
+
+		node.Entries = append(node.Entries, entry)
+	}
+
+	p.next() // advance past '}'
+
+	return node, nil
+}
+
+// --- Special Nodes ---
+
+func (p *Parser) parseValue() (Node, error) {
+	if p.expect(lexer.TokenIdent) {
+		return p.parseIdentifier()
+	} else if p.expect(lexer.TokenString) {
+		return p.parseString()
+	} else if p.expect(lexer.TokenNumber) {
+		return p.parseNumber()
+	} else if p.expect(lexer.TokenPath) {
+		return p.parsePath()
+	}
+
+	return nil, p.getErrorf("expected value but got %s", p.curTok.Value)
+}
+
+func (p *Parser) parseValueOrComplexType() (Node, error) {
+	if p.expect(lexer.TokenLBrace) {
+		return p.parseDictionary()
+	} else if p.expect(lexer.TokenKeyword) && p.curTok.Value == "callable" {
+		return p.parseCallable()
+	}
+
+	return p.parseValue()
+}
+
+func (p *Parser) parseString() (Node, error) {
+	if !p.expect(lexer.TokenString) {
+		return nil, p.getErrorf("expected string but got %s", p.curTok.Value)
+	}
+
+	node := &StringNode{
+		Value: p.curTok.Value,
+	}
+	p.next()
+
+	return node, nil
+}
+
+func (p *Parser) parseNumber() (Node, error) {
+	if !p.expect(lexer.TokenNumber) {
+		return nil, p.getErrorf("expected number but got %s", p.curTok.Value)
+	}
+
+	node := &NumberNode{
+		Value: p.curTok.Value,
+	}
+	p.next()
+
+	return node, nil
+}
+
 func (p *Parser) parseIdentifier() (Node, error) {
-	if p.curTok.Type != lexer.TokenIdent {
-		return nil, p.getErrorf("expected identifier but got %s", p.curTok.Literal)
+	if !p.expect(lexer.TokenIdent) {
+		return nil, p.getErrorf("expected identifier but got %s", p.curTok.Value)
 	}
 
 	node := &IdentifierNode{
-		Name: p.curTok.Literal,
+		Name: p.curTok.Value,
 	}
 	p.next()
 
@@ -114,11 +258,11 @@ func (p *Parser) parseIdentifier() (Node, error) {
 }
 
 func (p *Parser) parsePath() (Node, error) {
-	if p.curTok.Type != lexer.TokenPath {
-		return nil, p.getErrorf("expected path but got %s", p.curTok.Literal)
+	if !p.expect(lexer.TokenPath) {
+		return nil, p.getErrorf("expected path but got %s", p.curTok.Value)
 	}
 
-	path := strings.Clone(p.curTok.Literal)
+	path := strings.Clone(p.curTok.Value)
 	path = strings.TrimPrefix(path, "/")
 
 	pathPartsSplit := strings.Split(path, "/")

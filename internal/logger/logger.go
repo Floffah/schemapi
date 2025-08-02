@@ -1,8 +1,10 @@
 package logger
 
 import (
+	"errors"
 	"fmt"
 	"github.com/charmbracelet/lipgloss"
+	"github.com/floffah/schemapi/internal/parser"
 	"os"
 )
 
@@ -37,5 +39,17 @@ func HandleError(err error) {
 	if err != nil {
 		PrintError("An unexpected error occurred", err)
 		os.Exit(1)
+	}
+}
+
+func HandleParseError(err error, fileName string) {
+	if err != nil {
+		var parseErr *parser.ParserError
+		if errors.As(err, &parseErr) {
+			PrintError(fmt.Sprintf("%s:%d:%d: %s", fileName, parseErr.Line, parseErr.Col, parseErr.Message), nil)
+			os.Exit(1)
+		} else {
+			HandleError(err)
+		}
 	}
 }

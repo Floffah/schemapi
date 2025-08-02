@@ -33,7 +33,7 @@ func (p *Parser) getError(message string) error {
 	return &ParserError{
 		Message: message,
 		Line:    p.curTok.Line,
-		Col:     p.curTok.Col - len(p.curTok.Literal),
+		Col:     p.curTok.Col - len(p.curTok.Value),
 	}
 }
 
@@ -41,6 +41,6 @@ func (p *Parser) getErrorf(format string, args ...interface{}) error {
 	return &ParserError{
 		Message: fmt.Sprintf(format, args...),
 		Line:    p.curTok.Line,
-		Col:     p.curTok.Col - len(p.curTok.Literal),
+		Col:     p.curTok.Col - len(p.curTok.Value),
 	}
 }

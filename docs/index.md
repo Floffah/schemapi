@@ -4,22 +4,25 @@ layout: home
 
 hero:
   name: "Schemapi"
-  text: "Documentation for Schemapi"
-  tagline: My great project tagline
+  text: "Write elegant API schemas"
+  tagline: "Schema language for documenting simple to complex protocols"
   actions:
     - theme: brand
-      text: Markdown Examples
-      link: /markdown-examples
+      text: Get Started
+      link: /getting-started
     - theme: alt
-      text: API Examples
-      link: /api-examples
+      text: Syntax Overview
+      link: /syntax
 
 features:
-  - title: Feature A
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature B
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
-  - title: Feature C
-    details: Lorem ipsum dolor sit amet, consectetur adipiscing elit
+  - title: Terraform-like Syntax
+    details: Beautiful, declarative syntax for defining APIs
+    icon: '🐢'
+  - title: Extensible and Flexible
+    details: Easily extendable to support custom protocols and callables (not just for HTTP!)
+    icon: '🔌'
+  - title: Human-Friendly
+    details: Readable and concise, designed for developers and non-developers alike
+    icon: '🧑‍💻'
 ---
 

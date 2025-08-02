@@ -20,8 +20,8 @@ const (
 )
 
 type Token struct {
-	Type    TokenType
-	Literal string
-	Line    int
-	Col     int
+	Type  TokenType
+	Value string
+	Line  int
+	Col   int
 }

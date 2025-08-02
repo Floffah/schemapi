@@ -2,12 +2,124 @@
 &parser.RootNode{
     Children: {
         &parser.CallableNode{
-            Type:       "http.get",
+            Type:       &parser.IdentifierNode{Name:"http.get"},
             Identifier: &parser.PathNode{
                 parts: {"healthz"},
             },
-            Params:   {},
+            Params: {
+            },
             Children: {
+            },
+        },
+    },
+}
+---
+
+[TestParserSnapshot/full.sapi - 1]
+&parser.RootNode{
+    Children: {
+        &parser.CallableNode{
+            Type:       &parser.IdentifierNode{Name:"http.get"},
+            Identifier: &parser.PathNode{
+                parts: {"healthz"},
+            },
+            Params: {
+            },
+            Children: {
+                &parser.CallableDefinitionNode{
+                    Type:   &parser.IdentifierNode{Name:"query"},
+                    Params: {
+                        &parser.IdentifierNode{Name:"string"},
+                        &parser.StringNode{Value:"name"},
+                    },
+                    Children: &parser.DictionaryNode{
+                        Entries: {
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"description"},
+                                Value:      &parser.StringNode{Value:"Name of the service to check health for"},
+                            },
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"default"},
+                                Value:      &parser.StringNode{Value:"default-service"},
+                            },
+                        },
+                    },
+                },
+                &parser.CallableDefinitionNode{
+                    Type:   &parser.IdentifierNode{Name:"response"},
+                    Params: {
+                        &parser.StringNode{Value:"OK"},
+                    },
+                    Children: &parser.DictionaryNode{
+                        Entries: {
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"status"},
+                                Value:      &parser.NumberNode{Value:"200"},
+                            },
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"body"},
+                                Value:      &parser.DictionaryNode{
+                                    Entries: {
+                                        {
+                                            Identifier: &parser.IdentifierNode{Name:"message"},
+                                            Value:      &parser.StringNode{Value:"Service {name} is healthy"},
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                &parser.CallableDefinitionNode{
+                    Type:   &parser.IdentifierNode{Name:"response"},
+                    Params: {
+                        &parser.StringNode{Value:"Service Not Found"},
+                    },
+                    Children: &parser.DictionaryNode{
+                        Entries: {
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"status"},
+                                Value:      &parser.NumberNode{Value:"404"},
+                            },
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"body"},
+                                Value:      &parser.DictionaryNode{
+                                    Entries: {
+                                        {
+                                            Identifier: &parser.IdentifierNode{Name:"message"},
+                                            Value:      &parser.StringNode{Value:"Service {name} not found"},
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+                &parser.CallableDefinitionNode{
+                    Type:   &parser.IdentifierNode{Name:"response"},
+                    Params: {
+                        &parser.StringNode{Value:"Internal Server Error"},
+                    },
+                    Children: &parser.DictionaryNode{
+                        Entries: {
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"status"},
+                                Value:      &parser.NumberNode{Value:"500"},
+                            },
+                            {
+                                Identifier: &parser.IdentifierNode{Name:"body"},
+                                Value:      &parser.DictionaryNode{
+                                    Entries: {
+                                        {
+                                            Identifier: &parser.IdentifierNode{Name:"message"},
+                                            Value:      &parser.StringNode{Value:"An unexpected error occurred"},
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         },
     },

@@ -1,5 +1,5 @@
 callable http.get /healthz {
-  query string name {
+  query string "name" {
     description = "Name of the service to check health for"
     default = "default-service"
   }
@@ -19,9 +19,9 @@ callable http.get /healthz {
   }
 
   response "Internal Server Error" {
-	status: 500
+	status = 500
 	body = {
-	  message: "An unexpected error occurred"
+	  message = "An unexpected error occurred"
 	}
   }
 }

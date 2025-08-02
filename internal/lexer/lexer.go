@@ -43,40 +43,40 @@ func (l *Lexer) NextToken() Token {
 	switch l.ch {
 	case '{':
 		l.readChar()
-		return Token{Type: TokenLBrace, Literal: "{", Line: l.Line, Col: l.Col}
+		return Token{Type: TokenLBrace, Value: "{", Line: l.Line, Col: l.Col}
 	case '}':
 		l.readChar()
-		return Token{Type: TokenRBrace, Literal: "}", Line: l.Line, Col: l.Col}
+		return Token{Type: TokenRBrace, Value: "}", Line: l.Line, Col: l.Col}
 	case '=':
 		l.readChar()
-		return Token{Type: TokenEqual, Literal: "=", Line: l.Line, Col: l.Col}
+		return Token{Type: TokenEqual, Value: "=", Line: l.Line, Col: l.Col}
 	case ':':
 		l.readChar()
-		return Token{Type: TokenColon, Literal: ":", Line: l.Line, Col: l.Col}
+		return Token{Type: TokenColon, Value: ":", Line: l.Line, Col: l.Col}
 	case ',':
 		l.readChar()
-		return Token{Type: TokenComma, Literal: ",", Line: l.Line, Col: l.Col}
+		return Token{Type: TokenComma, Value: ",", Line: l.Line, Col: l.Col}
 	case '"', '\'':
 		return l.readString()
 	case 0:
-		return Token{Type: TokenEOF, Literal: "", Line: l.Line, Col: l.Col}
+		return Token{Type: TokenEOF, Value: "", Line: l.Line, Col: l.Col}
 	default:
 		if l.ch == '/' {
 			path := l.readPath()
-			return Token{Type: TokenPath, Literal: path, Line: l.Line, Col: l.Col}
+			return Token{Type: TokenPath, Value: path, Line: l.Line, Col: l.Col}
 		} else if isLetter(l.ch) {
 			ident := l.readIdentifier()
 			if isKeyword(ident) {
-				return Token{Type: TokenKeyword, Literal: ident, Line: l.Line, Col: l.Col}
+				return Token{Type: TokenKeyword, Value: ident, Line: l.Line, Col: l.Col}
 			}
-			return Token{Type: TokenIdent, Literal: ident, Line: l.Line, Col: l.Col}
+			return Token{Type: TokenIdent, Value: ident, Line: l.Line, Col: l.Col}
 		} else if unicode.IsDigit(l.ch) {
 			num := l.readNumber()
-			return Token{Type: TokenNumber, Literal: num, Line: l.Line, Col: l.Col}
+			return Token{Type: TokenNumber, Value: num, Line: l.Line, Col: l.Col}
 		}
 		illegal := l.ch
 		l.readChar()
-		return Token{Type: TokenIllegal, Literal: string(illegal)}
+		return Token{Type: TokenIllegal, Value: string(illegal)}
 	}
 }
 
@@ -111,7 +111,7 @@ func (l *Lexer) readString() Token {
 	}
 	str := l.input[pos:l.position]
 	l.readChar() // skip closing quote
-	return Token{Type: TokenString, Literal: str, Line: l.Line, Col: l.Col}
+	return Token{Type: TokenString, Value: str, Line: l.Line, Col: l.Col}
 }
 
 func (l *Lexer) readPath() string {

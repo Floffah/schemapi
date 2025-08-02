@@ -1,0 +1,26 @@
+# https://taskfile.dev
+
+$schema: https://taskfile.dev/schema.json
+version: '3'
+
+vars:
+  BUILD_DIR: 'build'
+
+tasks:
+  build:
+    desc: Build the project
+    cmds:
+      - go build -o {{.BUILD_DIR}}/schemapi ./main.go
+  test:
+    desc: Run tests
+    cmds:
+      - go test -v ./...
+  test:snaps:
+    desc: Run tests & update snapshots
+    cmds:
+      - UPDATE_SNAPS=true go test -v ./...
+  run:
+    desc: Run the built binary
+    dir: tests
+    cmds:
+      - go run ../main.go

@@ -4,13 +4,21 @@ type NodeType int
 
 const (
 	NodeRoot NodeType = iota
-	NodeCallable
+	NodeString
+	NodeNumber
+	NodePath
 	NodeIdentifier
+	NodeCallable
+	NodeCallableDefinition
+	NodeDictionary
+	NodeEntry
 )
 
 type Node interface {
 	NodeType() NodeType
 }
+
+// --- basic nodes ---
 
 type RootNode struct {
 	Children []Node
@@ -18,6 +26,22 @@ type RootNode struct {
 
 func (n *RootNode) NodeType() NodeType {
 	return NodeRoot
+}
+
+type StringNode struct {
+	Value string
+}
+
+func (n *StringNode) NodeType() NodeType {
+	return NodeString
+}
+
+type NumberNode struct {
+	Value string
+}
+
+func (n *NumberNode) NodeType() NodeType {
+	return NodeNumber
 }
 
 type IdentifierNode struct {
@@ -33,16 +57,45 @@ type PathNode struct {
 }
 
 func (n *PathNode) NodeType() NodeType {
-	return NodeIdentifier
+	return NodePath
 }
 
+// --- blocks ---
+
 type CallableNode struct {
-	Type       string
+	Type       Node
 	Identifier Node
-	Params     []string
+	Params     []Node
 	Children   []Node
 }
 
 func (n *CallableNode) NodeType() NodeType {
 	return NodeCallable
+}
+
+type CallableDefinitionNode struct {
+	Type     Node
+	Params   []Node
+	Children Node
+}
+
+func (n *CallableDefinitionNode) NodeType() NodeType {
+	return NodeCallableDefinition
+}
+
+type DictionaryNode struct {
+	Entries []EntryNode
+}
+
+func (n *DictionaryNode) NodeType() NodeType {
+	return NodeDictionary
+}
+
+type EntryNode struct {
+	Identifier Node
+	Value      Node
+}
+
+func (n *EntryNode) NodeType() NodeType {
+	return NodeEntry
 }
